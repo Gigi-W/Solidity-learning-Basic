@@ -3,7 +3,7 @@ pragma solidity ^0.8.21;
 // 导入 OpenZeppelin 的 ERC20 合约（最新版本）
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/token/ERC20/IERC20.sol";
 
-contract MyERC20 is IERC20{
+contract ERC20 is IERC20{
     // /**
     //  * 转账事件(IERC20已实现)
     //  */

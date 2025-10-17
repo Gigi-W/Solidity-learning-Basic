@@ -6,7 +6,7 @@ import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contr
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/utils/Strings.sol";
 
-contract MyERC721 is IERC721, IERC721Metadata{
+contract ERC721 is IERC721, IERC721Metadata{
     using Strings for uint256; 
     
     string public override name;
