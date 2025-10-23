@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import './MyERC20.sol';
+import './ERC20.sol';
 
 contract Faucet{
     // 发放代币事件
