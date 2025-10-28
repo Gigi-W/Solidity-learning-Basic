@@ -21,6 +21,7 @@ contract TimeLocker{
     }
     modifier onlyTimeLock{
         require(msg.sender==address(this),"TimeLocaker: caller not timeLock");
+        _;
     }
 
     constructor(uint _delay){
@@ -34,8 +35,8 @@ contract TimeLocker{
     }
 
     // 创建交易并添加到交易队列
-    function createTxAndQueue(aaddress target, uint value, string memory signature, bytes memory data, uint excuteTime) external onlyOwner returns(bytes32){
-        require(excuteTime>= block.timestamp+delay, "交易时间必须大于当前时间+锁定期");
+    function createTxAndQueue(address target, uint value, string memory signature, bytes memory data, uint excuteTime) external onlyOwner returns(bytes32){
+        require(excuteTime>= block.timestamp + delay); // 交易时间必须大于当前时间+锁定期
         bytes32 txHash = getTxHash(target,value,signature,data,excuteTime);
         queuedTxs[txHash]=true;
         emit QueueTx(txHash,target,value,signature,data,excuteTime);
@@ -45,36 +46,36 @@ contract TimeLocker{
     // 取消交易
     function cancelTx(address target, uint value, string memory signature, bytes memory data, uint excuteTime) external onlyOwner{
         bytes32 txHash = getTxHash(target,value,signature,data,excuteTime);
-        require(queuedTxs[txHash],"交易不存在");
+        require(queuedTxs[txHash]); // 交易不存在
         queuedTxs[txHash] = false;
         emit CancelTx(txHash,target,value,signature,data,excuteTime);
     }
 
     // 执行交易
-    function excuteTx(address target, uint value, string memory signature, bytes memory data, uint excuteTime) external onlyOwner{
+    function excuteTx(address target, uint value, string memory signature, bytes memory data, uint excuteTime) external onlyOwner returns(bytes memory) {
         bytes32 txHash = getTxHash(target,value,signature,data,excuteTime);
-        require(queuedTxs[txHash],"交易不存在");
-        require(block.timestamp >= excuteTime, "当前时间未到交易时间");
-        require(blobk.timestamp <= excuteTime + GRACE_PERIOD , "交易过期");
-        queueTxs[txHash]=false;
+        require(queuedTxs[txHash]); //交易不存在
+        require(block.timestamp >= excuteTime); // 当前时间未到交易时间
+        require(block.timestamp <= excuteTime + GRACE_PERIOD);// 交易过期
+        queuedTxs[txHash]=false;
 
         bytes memory callData;
         if(bytes(signature).length==0){
             callData = data;
         }else{
-            bytes4 sign = bytes4(keccak256(bytes(signature)))
+            bytes4 sign = bytes4(keccak256(bytes(signature)));
             callData = abi.encodePacked(sign, data);
         }
         
         // 使用call进行交易
-        (bool success, bytes memory returnData) = target.call({value: value})(callData);
+        (bool success, bytes memory returnData) = target.call{value: value}(callData);
         require(success, "transaction has been reverted");
 
-        emit ExcuteTx(target,value,signature,data,excuteTime);
+        emit ExcuteTx(txHash, target,value,signature,data,excuteTime);
         return returnData;
     }
 
-    function getTxHash(address target, uint value, string memory signature, bytes memory data, uint excuteTime) private returns(bytes32){
+    function getTxHash(address target, uint value, string memory signature, bytes memory data, uint excuteTime) private pure returns(bytes32){
         return keccak256(abi.encode(target,value,signature,data,excuteTime));
     }
 }

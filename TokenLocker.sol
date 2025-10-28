@@ -1,6 +1,8 @@
 // SPDX-License-Identifier:MIT
 pragma solidity ^0.8.21;
 
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/token/ERC20/IERC20.sol";
+
 // 代币锁合约，防止LP项目方突然撤出，发生rug-pull
 contract TokenLocker{
     address public immutable beneficiary; // 受益人
@@ -18,9 +20,9 @@ contract TokenLocker{
     }
 
     function release() external{
-        require((block.timestamp - start)>=duration, "early withdrawal");
+        require((block.timestamp - startTime)>=duration, "early withdrawal");
         uint amount = IERC20(token).balanceOf(address(this));
-        require(amount>0, "amount must be greater than 0")
-        IERC20(token).transfer(beneficiary, lockAmount);
+        require(amount>0, "amount must be greater than 0");
+        IERC20(token).transfer(beneficiary, amount);
     }
 }
